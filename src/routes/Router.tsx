@@ -8,7 +8,8 @@ import PackageListPage from "@/pages/content/PackageListPage";
 import ScenarioListPage from "@/pages/content/ScenarioListPage";
 import ScenarioPreparePage from "@/pages/play/ScenarioPreparePage";
 import SessionPlayPage from "@/pages/play/SessionPlayPage";
-
+import SessionEndPageA from "@/pages/play/SessionEndPageA";
+import SessionEndPageB from "@/pages/play/SessionEndPageB";
 
 export default function AppRouter() {
   return (
@@ -43,7 +44,8 @@ export default function AppRouter() {
 
 <Route path="/a/session/:sessionId/play" element={<RequireAuth><SessionPlayPage /></RequireAuth>} />
 <Route path="/b/session/:sessionId/play" element={<RequireAuth><SessionPlayPage /></RequireAuth>} />
-
+<Route path="/a/session/:sessionId/end" element={<RequireAuth><SessionEndPageA /></RequireAuth>} />
+<Route path="/b/session/:sessionId/end" element={<RequireAuth><SessionEndPageB /></RequireAuth>} />
 
 
 
