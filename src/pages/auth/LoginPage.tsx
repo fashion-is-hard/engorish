@@ -1,36 +1,56 @@
 import { useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { signIn } from "@/lib/auth";
-import { useNavigate } from "react-router-dom";
+import { getBasePath } from "@/lib/abVariant";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
+  const nav = useNavigate();
+  const loc = useLocation();
+  const base = getBasePath(loc.pathname);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-
+    setLoading(true);
     try {
       await signIn(email, password);
-      navigate("/a/home");
+      nav(`${base}/home`);
     } catch (err: any) {
-      alert(err.message);
+      alert(err?.message ?? "로그인 실패");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div>
+    <div style={{ padding: 24, maxWidth: 420, margin: "0 auto" }}>
       <h2>로그인</h2>
-      <form onSubmit={handleLogin}>
-        <input placeholder="이메일" onChange={(e) => setEmail(e.target.value)} />
+
+      <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
         <input
-          type="password"
-          placeholder="비밀번호"
-          onChange={(e) => setPassword(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="이메일"
+          autoComplete="email"
         />
-        <button type="submit">로그인</button>
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="비밀번호"
+          type="password"
+          autoComplete="current-password"
+        />
+        <button disabled={loading} type="submit">
+          {loading ? "로그인 중..." : "로그인"}
+        </button>
       </form>
+
+      <div style={{ marginTop: 12 }}>
+        아직 계정이 없나요? <Link to={`${base}/signup`}>회원가입</Link>
+      </div>
     </div>
   );
 }

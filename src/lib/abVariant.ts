@@ -8,3 +8,7 @@ export function getVariantFromPath(pathname: string): Variant {
 export function getSignupAppFromPath(pathname: string): SignupApp {
   return pathname.startsWith("/b") ? "app_b" : "app_a";
 }
+
+export function getBasePath(pathname: string): "/a" | "/b" {
+  return pathname.startsWith("/b") ? "/b" : "/a";
+}
