@@ -8,8 +8,23 @@ type ResultPayload = {
   reason?: string;
   success?: boolean;
   goals?: { goal_id: number; goal_text: string; achieved: boolean }[];
-  feedback?: { good?: string; improve?: string };
+  feedback?: { good?: string; improve?: string; next?: string };
 };
+
+
+
+function safeJson(v: any): any {
+  if (!v) return null;
+  if (typeof v === "object") return v;
+  if (typeof v === "string") {
+    try {
+      return JSON.parse(v);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 export default function SessionEndPageB() {
   const { sessionId } = useParams();
@@ -31,10 +46,13 @@ export default function SessionEndPageB() {
       setLoading(true);
       try {
         const s = await getSession(sessionId);
-        setStartedAt(s.started_at);
-        setEndedAt(s.ended_at);
 
-        const r = (s as any).result as ResultPayload | null;
+        setStartedAt(s.started_at ?? null);
+        setEndedAt(s.ended_at ?? null);
+
+        // ✅ result가 select에 포함되어 있어야 하고, jsonb면 객체로 바로 온다
+        const r = safeJson((s as any).result) as ResultPayload | null;
+
         setSuccess(Boolean(r?.success));
         setGoals(r?.goals ?? []);
         setFeedback(r?.feedback ?? {});
@@ -77,6 +95,9 @@ export default function SessionEndPageB() {
                   {g.goal_text}
                 </li>
               ))}
+              {(goals ?? []).length === 0 && (
+                <div style={{ opacity: 0.7, marginTop: 6 }}>(목표 결과 없음)</div>
+              )}
             </ol>
           </div>
 
@@ -85,6 +106,7 @@ export default function SessionEndPageB() {
               <>
                 <div><b>칭찬</b>: {feedback?.good ?? "좋은 시도였어요!"}</div>
                 <div><b>개선</b>: {feedback?.improve ?? "더 자연스럽게 이어서 말해보면 좋아요."}</div>
+                <div><b>다음</b>: {feedback?.next ?? "다음 시나리오도 도전해보세요!"}</div>
                 <div style={{ marginTop: 10, opacity: 0.75 }}>
                   다음 시나리오도 도전해보세요!
                 </div>
@@ -92,12 +114,14 @@ export default function SessionEndPageB() {
             ) : (
               <>
                 <div><b>개선</b>: {feedback?.improve ?? "목표를 더 직접적으로 말해보세요."}</div>
+                <div><b>다음</b>: {feedback?.next ?? "핵심 정보를 한 문장 더 붙여보세요."}</div>
                 <div style={{ marginTop: 10, opacity: 0.75 }}>
                   목표를 달성한 뒤 종료하면 성공으로 처리돼요.
                 </div>
               </>
             )}
           </div>
+
 
           <div style={{ marginTop: 18, display: "flex", gap: 10 }}>
             <button onClick={() => nav(`${base}/home`)}>홈으로</button>

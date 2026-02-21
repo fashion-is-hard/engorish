@@ -1,180 +1,134 @@
-/// <reference lib="deno.ns" />
+// supabase/functions/turn/index.ts
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
-const OPENAI_BASE = "https://api.openai.com/v1";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
-function corsHeaders(origin: string | null) {
-  return {
-    "Access-Control-Allow-Origin": origin ?? "*",
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-  };
-}
-
-async function requireAuth(req: Request) {
-  // 프론트에서 supabase.auth.getSession() 토큰을 Authorization: Bearer로 보냄
-  const auth = req.headers.get("authorization");
-  if (!auth?.startsWith("Bearer ")) throw new Error("Missing auth token");
-  return auth; // 그대로 OpenAI에 쓰는 게 아니라, 여기서는 인증 존재만 확인 (DB 접근은 기존 supabase client로 이미 RLS 처리)
-}
-
-async function openaiTranscribe(audio: Blob) {
-  const fd = new FormData();
-  fd.append("file", audio, "audio.webm");
-  fd.append("model", "gpt-4o-mini-transcribe");
-  // 필요하면: fd.append("language","en");
-
-  const r = await fetch(`${OPENAI_BASE}/audio/transcriptions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-    body: fd,
-  });
-
-  if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`STT failed: ${r.status} ${t}`);
-  }
-  const j = await r.json();
-  return String(j.text ?? "");
-}
-
-async function openaiChat(params: {
-  system: string;
-  messages: { role: "user" | "assistant" | "system"; content: string }[];
-}) {
-  const body = {
-    model: "gpt-4o-mini",
-    messages: [{ role: "system", content: params.system }, ...params.messages],
-    temperature: 0.6,
-  };
-
-  const r = await fetch(`${OPENAI_BASE}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`Chat failed: ${r.status} ${t}`);
-  }
-  const j = await r.json();
-  return String(j.choices?.[0]?.message?.content ?? "");
-}
-
-async function openaiTts(text: string) {
-  const body = {
-    model: "gpt-4o-mini-tts",
-    voice: "alloy",
-    input: text,
-    format: "mp3",
-  };
-
-  const r = await fetch(`${OPENAI_BASE}/audio/speech`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`TTS failed: ${r.status} ${t}`);
-  }
-
-  const buf = new Uint8Array(await r.arrayBuffer());
-  // base64 encode
-  let binary = "";
-  for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-  const b64 = btoa(binary);
-
-  return { mime: "audio/mpeg", b64 };
-}
-
-serve(async (req) => {
-  const origin = req.headers.get("origin");
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders(origin) });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    await requireAuth(req);
+    const { session_id, user_audio_path, mime } = await req.json();
 
-    const ct = req.headers.get("content-type") ?? "";
-    if (!ct.includes("multipart/form-data")) {
-      return new Response(JSON.stringify({ error: "multipart/form-data required" }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
+    const openaiKey = Deno.env.get("OPENAI_API_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const form = await req.formData();
+    // 1️⃣ 유저 음성 다운로드
+    const audioRes = await fetch(
+      `${supabaseUrl}/storage/v1/object/public/audio/${user_audio_path}`
+    );
 
-    const audio = form.get("audio");
-    if (!(audio instanceof File)) {
-      return new Response(JSON.stringify({ error: "audio file required" }), {
-        status: 400,
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      });
-    }
+    const audioBlob = await audioRes.blob();
 
-    const variant = String(form.get("variant") ?? "A"); // "A" | "B"
-    const scenarioTitle = String(form.get("scenario_title") ?? "");
-    const opening = String(form.get("opening") ?? "");
-    const goalsJson = String(form.get("goals_json") ?? "[]"); // B goals list
-    const historyJson = String(form.get("history_json") ?? "[]"); // [{role,content}...]
+    // 2️⃣ STT (Whisper)
+    const formData = new FormData();
+    formData.append("file", audioBlob);
+    formData.append("model", "whisper-1");
 
-    const userText = await openaiTranscribe(audio);
+    const sttRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${openaiKey}` },
+      body: formData,
+    });
 
-    // 아주 기본 시스템 프롬프트(너는 나중에 npc/persona로 확장)
-    const system = [
-      "You are an English conversation partner in a roleplay scenario.",
-      "Keep responses concise, natural, and helpful.",
-      variant === "B"
-        ? `User must achieve these goals: ${goalsJson}. End naturally when goals are met.`
-        : "This is A variant: keep the conversation flowing. User has a 20-turn limit.",
-      scenarioTitle ? `Scenario: ${scenarioTitle}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const sttData = await sttRes.json();
+    const transcript = sttData.text ?? "";
 
-    const history = JSON.parse(historyJson) as {
-      role: "user" | "assistant";
-      content: string;
-    }[];
+    // 3️⃣ LLM 응답
+    const chatRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${openaiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are an English conversation partner." },
+          { role: "user", content: transcript },
+        ],
+      }),
+    });
 
-    const messages = [
-      ...(opening ? [{ role: "assistant" as const, content: opening }] : []),
-      ...history,
-      { role: "user" as const, content: userText },
-    ];
+    const chatData = await chatRes.json();
+    const aiText = chatData.choices?.[0]?.message?.content ?? "OK";
 
-    const aiText = await openaiChat({ system, messages });
-    const tts = await openaiTts(aiText);
+    // 4️⃣ TTS
+    const ttsRes = await fetch("https://api.openai.com/v1/audio/speech", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${openaiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini-tts",
+        voice: "alloy",
+        input: aiText,
+      }),
+    });
+
+    const ttsBuffer = await ttsRes.arrayBuffer();
+    const aiAudioPath = `ai/${session_id}_${Date.now()}.mp3`;
+
+    await fetch(`${supabaseUrl}/storage/v1/object/audio/${aiAudioPath}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseServiceKey}`,
+        "Content-Type": "audio/mpeg",
+      },
+      body: ttsBuffer,
+    });
+
+    const aiAudioUrl = `${supabaseUrl}/storage/v1/object/public/audio/${aiAudioPath}`;
+
+    // 5️⃣ roleplay_turns 저장 (user + ai)
+    await fetch(`${supabaseUrl}/rest/v1/roleplay_turns`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseServiceKey}`,
+        apikey: supabaseServiceKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify([
+        {
+          session_id,
+          role: "user",
+          text: "(음성 입력)",
+          user_audio_path,
+          user_audio_mime: mime,
+          user_transcript: transcript,
+          stt_model: "whisper-1",
+        },
+        {
+          session_id,
+          role: "ai",
+          text: aiText,
+          ai_audio_path: aiAudioPath,
+          tts_model: "gpt-4o-mini-tts",
+          tts_voice: "alloy",
+        },
+      ]),
+    });
 
     return new Response(
       JSON.stringify({
-        user_text: userText,
-        ai_text: aiText,
-        ai_audio_mime: tts.mime,
-        ai_audio_b64: tts.b64,
+        user: { text: transcript },
+        ai: { text: aiText, audio_url: aiAudioUrl },
       }),
-      {
-        headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e?.message ?? e) }), {
+    return new Response(JSON.stringify({ error: String(e) }), {
       status: 500,
-      headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+      headers: corsHeaders,
     });
   }
 });

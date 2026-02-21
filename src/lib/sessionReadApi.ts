@@ -1,34 +1,61 @@
-import { supabase } from "./supabaseClient";
+// src/lib/sessionReadApi.ts
+import { supabase } from "@/lib/supabaseClient";
+
+export type Variant = "A" | "B";
 
 export type SessionRow = {
   session_id: string;
-  user_id: string;
-  variant: "A" | "B";
+  user_id: string | null;
+  variant: Variant;
   scenario_id: number;
-  status: "in_progress" | "ended";
-  started_at: string;
+
+  status: string | null;
+  started_at: string | null;
   ended_at: string | null;
-  settings: any;
-  turn_count: number;
-  word_count: number;
+
+  settings: any | null; // jsonb
+  turn_count: number | null;
+  word_count: number | null;
+  metrics: any | null; // jsonb
+  result: any | null;  // jsonb
 };
 
-export async function getSession(sessionId: string) {
-  const { data, error } = await supabase
-    .from("roleplay_sessions")
-    .select("session_id,user_id,variant,scenario_id,status,started_at,ended_at,settings,turn_count,word_count")
-    .eq("session_id", sessionId)
-    .single();
-  if (error) throw error;
-  return data as SessionRow;
+export type TurnRow = {
+  turn_id: string;
+  session_id: string;
+  role: "user" | "ai" | "system";
+  text: string;
+  corrected_text: string | null;
+  created_at: string;
+};
+
+function toVariant(v: unknown): Variant {
+  return v === "B" ? "B" : "A";
 }
 
-export async function getTurns(sessionId: string) {
+export async function getSession(sessionId: string): Promise<SessionRow> {
+  const { data, error } = await supabase
+    .from("roleplay_sessions")
+    .select(
+      "session_id,user_id,variant,scenario_id,status,started_at,ended_at,settings,turn_count,word_count,metrics,result"
+    )
+    .eq("session_id", sessionId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("세션이 없습니다.");
+
+  const row = data as Omit<SessionRow, "variant"> & { variant: any };
+  return { ...row, variant: toVariant(row.variant) };
+}
+
+export async function getTurns(sessionId: string): Promise<TurnRow[]> {
   const { data, error } = await supabase
     .from("roleplay_turns")
-    .select("turn_id,role,text,corrected_text,created_at")
+    .select("turn_id,session_id,role,text,corrected_text,created_at")
     .eq("session_id", sessionId)
-    .order("turn_id", { ascending: true });
+    .order("created_at", { ascending: true });
+
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as TurnRow[];
 }

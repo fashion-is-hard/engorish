@@ -16,14 +16,14 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* A */}
-<Route path="/a/category" element={<RequireAuth><CategoryListPage /></RequireAuth>} />
-<Route path="/a/category/:categoryId" element={<RequireAuth><PackageListPage /></RequireAuth>} />
-<Route path="/a/package/:packageId" element={<RequireAuth><ScenarioListPage /></RequireAuth>} />
+        <Route path="/a/category" element={<RequireAuth><CategoryListPage /></RequireAuth>} />
+        <Route path="/a/category/:categoryId" element={<RequireAuth><PackageListPage /></RequireAuth>} />
+        <Route path="/a/package/:packageId" element={<RequireAuth><ScenarioListPage /></RequireAuth>} />
 
-{/* B */}
-<Route path="/b/category" element={<RequireAuth><CategoryListPage /></RequireAuth>} />
-<Route path="/b/category/:categoryId" element={<RequireAuth><PackageListPage /></RequireAuth>} />
-<Route path="/b/package/:packageId" element={<RequireAuth><ScenarioListPage /></RequireAuth>} />
+        {/* B */}
+        <Route path="/b/category" element={<RequireAuth><CategoryListPage /></RequireAuth>} />
+        <Route path="/b/category/:categoryId" element={<RequireAuth><PackageListPage /></RequireAuth>} />
+        <Route path="/b/package/:packageId" element={<RequireAuth><ScenarioListPage /></RequireAuth>} />
 
 
         <Route path="/" element={<Navigate to="/a/login" replace />} />
@@ -40,12 +40,12 @@ export default function AppRouter() {
 
         <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
         <Route path="/a/scenario/:scenarioId/prepare" element={<RequireAuth><ScenarioPreparePage /></RequireAuth>} />
-<Route path="/b/scenario/:scenarioId/prepare" element={<RequireAuth><ScenarioPreparePage /></RequireAuth>} />
+        <Route path="/b/scenario/:scenarioId/prepare" element={<RequireAuth><ScenarioPreparePage /></RequireAuth>} />
 
-<Route path="/a/session/:sessionId/play" element={<RequireAuth><SessionPlayPage /></RequireAuth>} />
-<Route path="/b/session/:sessionId/play" element={<RequireAuth><SessionPlayPage /></RequireAuth>} />
-<Route path="/a/session/:sessionId/end" element={<RequireAuth><SessionEndPageA /></RequireAuth>} />
-<Route path="/b/session/:sessionId/end" element={<RequireAuth><SessionEndPageB /></RequireAuth>} />
+        <Route path="/a/session/:sessionId/play" element={<RequireAuth><SessionPlayPage /></RequireAuth>} />
+        <Route path="/b/session/:sessionId/play" element={<RequireAuth><SessionPlayPage /></RequireAuth>} />
+        <Route path="/a/session/:sessionId/end" element={<RequireAuth><SessionEndPageA /></RequireAuth>} />
+        <Route path="/b/session/:sessionId/end" element={<RequireAuth><SessionEndPageB /></RequireAuth>} />
 
 
 

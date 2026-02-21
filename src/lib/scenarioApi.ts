@@ -15,6 +15,7 @@ export type ScenarioGoalRow = {
   scenario_id: number;
   goal_text: string;
   sort_order: number | null;
+  goal_prompt_en: string | null;
 };
 
 export async function getScenarioById(scenarioId: number) {
