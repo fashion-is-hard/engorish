@@ -1,13 +1,17 @@
+// LoginPage.tsx
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { signIn } from "@/lib/auth";
-import { getBasePath } from "@/lib/abVariant";
+import { supabase } from "@/lib/supabaseClient";
 import styles from "./LoginPage.module.css";
+
+type Variant = "a" | "b";
 
 export default function LoginPage() {
   const nav = useNavigate();
   const loc = useLocation();
-  const base = getBasePath(loc.pathname);
+
+  const from = (loc.state as any)?.from as string | undefined;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +21,39 @@ export default function LoginPage() {
     return email.trim().length > 0 && password.trim().length > 0 && !loading;
   }, [email, password, loading]);
 
+  async function routeAfterLogin() {
+    // 1) 혹시 원래 가려던 경로(from)가 있으면 우선 그쪽으로 (가드가 variant 교정해줌)
+    if (from && typeof from === "string" && from.startsWith("/")) {
+      nav(from, { replace: true });
+      return;
+    }
+
+    // 2) 없으면 내 variant를 조회해서 홈으로
+    const { data: sessionRes } = await supabase.auth.getSession();
+    const user = sessionRes.session?.user;
+    if (!user) {
+      nav("/login", { replace: true });
+      return;
+    }
+
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("ab_variant")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      // 프로필 조회 실패 시 안전하게 a로
+      nav("/a/home", { replace: true });
+      return;
+    }
+
+    let v = profile?.ab_variant as Variant | null;
+    if (v !== "a" && v !== "b") v = "a";
+
+    nav(`/${v}/home`, { replace: true });
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
@@ -24,7 +61,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      nav(`${base}/home`);
+      await routeAfterLogin();
     } catch (err: any) {
       alert(err?.message ?? "로그인 실패");
     } finally {
@@ -73,7 +110,7 @@ export default function LoginPage() {
 
         <div className={`t-body-14-r ${styles.footer}`}>
           잉고리쉬가 처음이신가요?
-          <Link className={`t-link-14 ${styles.link}`} to={`${base}/signup`}>
+          <Link className={`t-link-14 ${styles.link}`} to="/signup">
             회원가입
           </Link>
         </div>

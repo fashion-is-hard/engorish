@@ -1,18 +1,16 @@
+// SignUpPage.tsx
 import { useMemo, useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   signUpWithProfile,
   EXCHANGE_STATUS_OPTIONS,
   ExchangeStatusDb,
   GenderUi,
 } from "@/lib/auth";
-import { getBasePath } from "@/lib/abVariant";
 import styles from "./SignUpPage.module.css";
 
 export default function SignUpPage() {
   const nav = useNavigate();
-  const loc = useLocation();
-  const base = getBasePath(loc.pathname);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,8 +47,10 @@ export default function SignUpPage() {
         age,
         exchangeStatus,
       });
+
+      // ✅ A/B는 DB에서 “사용자 모르게” 이미 배정됨(트리거/서버 로직)
       alert("회원가입 완료! 이제 로그인 해주세요.");
-      nav(`${base}/login`);
+      nav("/login", { replace: true });
     } catch (err: any) {
       alert(err?.message ?? "회원가입 실패");
     } finally {
@@ -69,7 +69,6 @@ export default function SignUpPage() {
             onClick={() => nav(-1)}
             aria-label="뒤로가기"
           >
-            {/* simple left chevron */}
             <svg
               className={styles.backIcon}
               viewBox="0 0 24 24"
@@ -87,7 +86,6 @@ export default function SignUpPage() {
           </button>
         </div>
 
-        {/* Content */}
         <div className={styles.content}>
           <h1 className={`t-title-24-b ${styles.title}`}>회원가입</h1>
 
@@ -156,7 +154,6 @@ export default function SignUpPage() {
               ))}
             </select>
 
-            {/* 약관 동의 row */}
             <div className={styles.agreeRow}>
               <label className={`t-body-14-r ${styles.agreeLeft}`}>
                 <input
@@ -176,15 +173,13 @@ export default function SignUpPage() {
               </a>
             </div>
 
-            {/* 아래 링크 */}
             <div className={`t-body-14-r ${styles.footer}`}>
               이미 계정이 있나요?
-              <Link className={`t-link-14 ${styles.link}`} to={`${base}/login`}>
+              <Link className={`t-link-14 ${styles.link}`} to="/login">
                 로그인
               </Link>
             </div>
 
-            {/* form 안에 버튼을 두되, 실제 위치는 bottomBar로 고정 */}
             <div className={styles.bottomBar}>
               <button
                 type="submit"

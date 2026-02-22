@@ -1,5 +1,5 @@
+// auth.ts
 import { supabase } from "./supabaseClient";
-import { getSignupAppFromPath } from "./abVariant";
 
 export type ExchangeStatusDb = "pre_departure" | "abroad" | "finished";
 export type GenderUi = "여" | "남" | "기타" | "선택안함";
@@ -29,7 +29,7 @@ export async function signUpWithProfile(params: {
   email: string;
   password: string;
   fullName: string;
-  gender: GenderUi;              // ✅ UI 값으로 받기
+  gender: GenderUi;
   age: number;
   exchangeStatus: ExchangeStatusDb;
 }) {
@@ -41,17 +41,26 @@ export async function signUpWithProfile(params: {
   const user = data.user;
   if (!user) throw new Error("User not created");
 
-  const signupApp = getSignupAppFromPath(window.location.pathname);
+  // ✅ 공용 회원가입이므로 signup_app은 경로 기반 추정 X
+  // - 제약이 없다면: 'web'
+  // - 제약이 app_a/app_b만 허용이면: 'app_a' 같은 값으로 고정
+  const signupApp = "app_a";
 
-  const { error: profileError } = await supabase.from("profiles").insert({
-    id: user.id,
-    email,
-    full_name: fullName,
-    gender: GENDER_MAP[gender],     // ✅ DB 허용값으로 변환
-    age,
-    exchange_status: exchangeStatus,
-    signup_app: signupApp,
-  });
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        id: user.id,
+        email,
+        full_name: fullName,
+        gender: GENDER_MAP[gender],
+        age,
+        exchange_status: exchangeStatus,
+        signup_app: signupApp,
+        // ❌ ab_variant는 넣지 않는다 (DB 트리거가 랜덤 부여)
+      },
+      { onConflict: "id" }
+    );
 
   if (profileError) throw profileError;
 

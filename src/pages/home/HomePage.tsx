@@ -156,6 +156,7 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
       {/* Top App Bar */}
+      {/* Top App Bar */}
       <div
         style={{
           height: headerHeight,
@@ -172,7 +173,8 @@ export default function HomePage() {
         <button
           onClick={async () => {
             await supabase.auth.signOut();
-            nav(`${base}/login`, { replace: true });
+            // ✅ 공용 로그인으로 이동
+            nav(`/login`, { replace: true });
           }}
           style={{
             border: "none",
