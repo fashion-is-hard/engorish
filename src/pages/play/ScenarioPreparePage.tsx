@@ -46,6 +46,13 @@ export default function ScenarioPreparePage() {
     return [];
   }, [scenario]);
 
+  // ✅ public 썸네일 경로
+  const heroThumbSrc = useMemo(() => {
+    const key = (scenario?.thumbnail_key ?? "").trim();
+    if (!key) return null;
+    return `/thumbnails/${key}.png`;
+  }, [scenario?.thumbnail_key]);
+
   useEffect(() => {
     if (!Number.isFinite(sid)) return;
 
@@ -120,7 +127,22 @@ export default function ScenarioPreparePage() {
           <>
             {/* Hero */}
             <div className={styles.hero}>
-              <div className={styles.heroThumb} />
+              {/* ✅ 썸네일 출력: 없으면 회색 박스 유지 */}
+              <div className={styles.heroThumb}>
+                {heroThumbSrc && (
+                  <img
+                    className={styles.heroThumbImg}
+                    src={heroThumbSrc}
+                    alt={`${scenario.title} thumbnail`}
+                    loading="lazy"
+                    onError={(e) => {
+                      // 파일 없으면 이미지 숨김 (배경색 박스는 그대로)
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                )}
+              </div>
+
               {topChip && <div className={`t-cap-12-m ${styles.heroChip}`}>{topChip}</div>}
               <div className={`t-title-24-b ${styles.heroTitle}`}>{scenario.title}</div>
               {subTitle && <div className={`t-body-14-r ${styles.heroSub}`}>{subTitle}</div>}
@@ -167,7 +189,6 @@ export default function ScenarioPreparePage() {
                       <div key={i}>
                         <div className={styles.phraseItem}>
                           <div className={`t-body-16-r ${styles.phraseEn}`}>{p}</div>
-                          {/* KO는 데이터 없어서 생략 (추후 컬럼 추가하면 같이 표시 가능) */}
                         </div>
                         {i < 2 && <div className={styles.phraseDivider} />}
                       </div>
@@ -177,15 +198,17 @@ export default function ScenarioPreparePage() {
               </Section>
             )}
 
-            {/* ✅ 대화설정: A/B 공통(스크샷 형태 통일) */}
+            {/* ✅ 대화설정 */}
             <Section label="대화설정">
               <div className={`${styles.card} ${styles.aSettingsCard}`}>
-                {/* 교정 모드: 토글 + ON/OFF 텍스트 */}
                 <div className={styles.aSetRow}>
                   <div className="t-body-16-r">교정 모드</div>
 
                   <div className={styles.toggleWrap}>
-                    <span className={`t-body-14-r ${styles.toggleLabel} ${settings.correction_mode ? styles.toggleLabelOn : ""}`}>
+                    <span
+                      className={`t-body-14-r ${styles.toggleLabel} ${settings.correction_mode ? styles.toggleLabelOn : ""
+                        }`}
+                    >
                       ON
                     </span>
 
@@ -199,7 +222,10 @@ export default function ScenarioPreparePage() {
                       <span className={styles.knob} />
                     </button>
 
-                    <span className={`t-body-14-r ${styles.toggleLabel} ${!settings.correction_mode ? styles.toggleLabelOff : ""}`}>
+                    <span
+                      className={`t-body-14-r ${styles.toggleLabel} ${!settings.correction_mode ? styles.toggleLabelOff : ""
+                        }`}
+                    >
                       OFF
                     </span>
                   </div>
@@ -207,20 +233,25 @@ export default function ScenarioPreparePage() {
 
                 <div className={styles.aDivider} />
 
-                {/* 난이도: 둘 다 primary로 활성화, 기본은 basic(이미 state 기본값) */}
                 <div className={styles.aSetRow}>
                   <div className="t-body-16-r">난이도 선택</div>
                   <div className={styles.levelGroup}>
                     <button
                       type="button"
-                      className={[styles.levelBtn, settings.difficulty === "basic" ? styles.levelBtnActive : ""].join(" ")}
+                      className={[
+                        styles.levelBtn,
+                        settings.difficulty === "basic" ? styles.levelBtnActive : "",
+                      ].join(" ")}
                       onClick={() => setSettings((s) => ({ ...s, difficulty: "basic" }))}
                     >
                       Basic
                     </button>
                     <button
                       type="button"
-                      className={[styles.levelBtn, settings.difficulty === "hard" ? styles.levelBtnActive : ""].join(" ")}
+                      className={[
+                        styles.levelBtn,
+                        settings.difficulty === "hard" ? styles.levelBtnActive : "",
+                      ].join(" ")}
                       onClick={() => setSettings((s) => ({ ...s, difficulty: "hard" }))}
                     >
                       Intermediate
@@ -230,7 +261,6 @@ export default function ScenarioPreparePage() {
 
                 <div className={styles.aDivider} />
 
-                {/* 질문 재생 속도: 그대로 */}
                 <div className={styles.aSliderBlock}>
                   <div className={styles.aSliderTop}>
                     <div className="t-body-16-r">질문 재생 속도</div>

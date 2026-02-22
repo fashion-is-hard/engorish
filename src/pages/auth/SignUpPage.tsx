@@ -124,7 +124,6 @@ export default function SignUpPage() {
                 <option value="선택안함">성별</option>
                 <option value="여">여</option>
                 <option value="남">남</option>
-                <option value="기타">기타</option>
               </select>
 
               <input

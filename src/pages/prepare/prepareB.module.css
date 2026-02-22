@@ -1,0 +1,297 @@
+.root {
+    min-height: 100vh;
+    background: var(--color-bg);
+}
+
+/* top header (back only) */
+.header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.backBtn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.backBtn:active {
+    transform: translateY(1px);
+}
+
+.page {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 16px 16px 120px;
+    /* 하단 CTA 공간 */
+}
+
+.loading {
+    margin-top: 12px;
+    color: var(--color-primary-light);
+}
+
+/* hero */
+.hero {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 18px 8px 10px;
+}
+
+.heroThumb {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background: var(--color-secondary-light);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+}
+
+.heroImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.heroChip {
+    margin-top: 10px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--color-secondary);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heroTitle {
+    margin-top: 14px;
+    color: var(--color-text);
+}
+
+.heroSub {
+    margin-top: 6px;
+    color: var(--color-primary-light);
+}
+
+/* sections */
+.section {
+    margin-top: 14px;
+}
+
+.sectionLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: #3e4245;
+    /* 스샷처럼 진한 칩 */
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+/* common card */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    padding: 14px;
+}
+
+/* goals */
+.goalList {
+    display: grid;
+    gap: 12px;
+}
+
+.goalRow {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 10px;
+    align-items: start;
+}
+
+.goalCheck {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-secondary);
+    color: #fff;
+    font-weight: 900;
+    margin-top: 2px;
+}
+
+/* settings card */
+.settingsCard {
+    padding: 0;
+    overflow: hidden;
+}
+
+.setRow {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 10px;
+    padding: 14px;
+    align-items: center;
+}
+
+.setLabel {
+    color: var(--color-text);
+    opacity: 0.95;
+}
+
+.setRight {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.divider {
+    height: 1px;
+    background: var(--color-border);
+}
+
+.pill {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.pillInactive {
+    color: var(--color-primary-light);
+    background: #f3f5f7;
+    border-color: transparent;
+}
+
+.pillActive {
+    background: #3e4245;
+    color: #fff;
+    border-color: #3e4245;
+}
+
+.pillActiveSoft {
+    background: var(--color-secondary-light);
+    color: var(--color-primary);
+    border-color: transparent;
+}
+
+/* speed */
+.speedBlock {
+    padding: 14px;
+}
+
+.speedTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.speedValue {
+    color: var(--color-primary-light);
+}
+
+.speedTicks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.tick {
+    text-align: center;
+    color: var(--color-primary-light);
+    cursor: pointer;
+    user-select: none;
+}
+
+.tickActive {
+    color: var(--color-text);
+    font-weight: 900;
+}
+
+.range {
+    width: 100%;
+    accent-color: #3e4245;
+    /* 스샷 느낌. 기존 컬러 시스템 영향 최소 */
+}
+
+/* info box */
+.infoBox {
+    margin-top: 16px;
+    background: var(--color-secondary-light);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--color-primary-light);
+}
+
+.infoTitle {
+    color: var(--color-text);
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.bullets {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 6px;
+}
+
+/* bottom CTA */
+.bottomBar {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background: var(--color-bg);
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+    padding: 14px 16px 18px;
+}
+
+.bottomInner {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.ctaBtn {
+    width: 100%;
+    height: 52px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    background: #3e4245;
+    color: #fff;
+}
+
+.ctaBtn:active {
+    transform: translateY(1px);
+}
+
+.ctaBtnDisabled {
+    background: var(--color-secondary-light);
+    color: #ffffff;
+    cursor: not-allowed;
+}

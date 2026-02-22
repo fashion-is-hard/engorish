@@ -9,9 +9,11 @@ import {
 } from "@/lib/contentApi";
 import styles from "./CategoryListPage.module.css";
 
-function getThumbSrc(thumbnailKey: string | null) {
-  if (!thumbnailKey) return null;
-  return `/thumbnails/${thumbnailKey}.png`;
+// ✅ public/thumbnails/{thumbnail_key}.png
+function toThumbSrc(thumbnailKey?: string | null) {
+  const key = (thumbnailKey ?? "").trim();
+  if (!key) return "";
+  return `/thumbnails/${key}.png`;
 }
 
 export default function CategoryListPage() {
@@ -29,6 +31,9 @@ export default function CategoryListPage() {
   const [packages, setPackages] = useState<PackageRow[]>([]);
   const [pkgLoading, setPkgLoading] = useState(false);
 
+  // ✅ 이미지 로드 실패한 package_id 저장 (fallback 처리)
+  const [brokenThumbs, setBrokenThumbs] = useState<Record<number, true>>({});
+
   // 1) 카테고리(탭) 로드
   useEffect(() => {
     let mounted = true;
@@ -37,7 +42,6 @@ export default function CategoryListPage() {
       try {
         setLoading(true);
         const rows = await getCategories();
-
         if (!mounted) return;
 
         const activeRows = rows.filter((r) => r.is_active !== false);
@@ -68,7 +72,10 @@ export default function CategoryListPage() {
         setPkgLoading(true);
         const rows = await getPackagesByCategory(activeCategoryId);
         if (!mounted) return;
+
         setPackages(rows);
+        // ✅ 카테고리 바뀌면 brokenThumb 기록도 리셋(선택)
+        setBrokenThumbs({});
       } catch (e: any) {
         alert(e?.message ?? "패키지 로드 실패");
       } finally {
@@ -85,13 +92,6 @@ export default function CategoryListPage() {
     const c = categories.find((x) => x.category_id === activeCategoryId);
     return c?.title ?? "학습영역";
   }, [categories, activeCategoryId]);
-
-  // ✅ public/thumbnails/{thumbnail_key}.png 로 매핑
-  function getThumbSrc(thumbnailKey?: string | null) {
-    const key = (thumbnailKey ?? "").trim();
-    if (!key) return ""; // 썸네일 없으면 빈값 → fallback div 보여줌
-    return `/thumbnails/${key}.png`;
-  }
 
   return (
     <div className={styles.root}>
@@ -151,7 +151,8 @@ export default function CategoryListPage() {
         {/* Grid cards = packages */}
         <div className={styles.grid}>
           {packages.map((p) => {
-            const thumbSrc = getThumbSrc(p.thumbnail_key);
+            const thumbSrc = toThumbSrc(p.thumbnail_key);
+            const isBroken = !!brokenThumbs[p.package_id];
 
             return (
               <button
@@ -159,23 +160,30 @@ export default function CategoryListPage() {
                 className={styles.cardBtn}
                 onClick={() =>
                   nav(`${base}/package/${p.package_id}`, {
-                    state: { packageTitle: p.title },
+                    state: {
+                      packageTitle: p.title,
+                      categoryTitle: activeTitle, // ✅ Prepare로 넘길 때 쓰기 좋음
+                    },
                   })
                 }
               >
                 <div className={styles.card}>
-                  {thumbSrc ? (
+                  {/* ✅ 썸네일: src가 있고, 깨진적 없을 때만 img */}
+                  {thumbSrc && !isBroken ? (
                     <img
                       src={thumbSrc}
-                      alt={`${p.title} thumbnail`}
+                      alt=""
                       className={styles.thumbImg}
                       loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
+                      onError={() =>
+                        setBrokenThumbs((prev) => ({
+                          ...prev,
+                          [p.package_id]: true,
+                        }))
+                      }
                     />
                   ) : (
-                    <div className={styles.thumb} />
+                    <div className={styles.thumb} aria-hidden />
                   )}
 
                   <div className={`t-sub-18-sb ${styles.cardTitle}`}>

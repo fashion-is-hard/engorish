@@ -75,38 +75,70 @@
     justify-content: center;
 }
 
+/* ✅ 카드: 2번째 UI처럼 (썸네일 작게 + 텍스트 아래) */
 .card {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
     padding: 14px;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 8px;
 }
 
+/* ✅ 썸네일 크기 고정 (여기가 핵심) */
 .thumb {
     width: 72px;
     height: 72px;
     border-radius: 10px;
     background: var(--color-secondary-light);
-    margin-bottom: 10px;
+    overflow: hidden;
+    /* 이미지가 커도 잘라냄 */
+    display: block;
+}
+
+/* 전역 img 스타일에 의해 커지는 것 방지 */
+.thumbImg {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    /* 꽉 차게(잘림 허용) */
+    display: block;
 }
 
 .itemTitle {
     color: var(--color-text);
-    margin-bottom: 6px;
+    margin-top: 2px;
 }
 
 .itemDesc {
     color: var(--color-primary-light);
+    line-height: 1.45;
 }
 
 /* Bottom CTA */
+/* Bottom CTA */
 .bottomBar {
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
-    width: 100%;
+
     background: var(--color-bg);
-    padding: 14px 16px 18px;
+    padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
     box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+    z-index: 50;
+}
+
+/* bottomBar 안에서 가운데 정렬 + 페이지 폭(420) 맞추기 */
+.bottomInner {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
 }
 
 .ctaBtn {
@@ -114,9 +146,12 @@
     height: 52px;
     border-radius: 8px;
     border: 0;
-    cursor: pointer;
+
+    display: block;
+    /* ✅ width 100% 확실히 먹게 */
     background: var(--color-primary);
     color: #fff;
+    cursor: pointer;
 }
 
 .ctaBtn:active {
@@ -126,4 +161,13 @@
 .ctaBtnDisabled {
     background: var(--color-secondary-light);
     cursor: not-allowed;
+    transform: none;
+}
+
+.cardBtn {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
 }

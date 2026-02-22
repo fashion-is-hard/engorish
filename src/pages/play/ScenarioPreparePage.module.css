@@ -46,11 +46,15 @@
 }
 
 .heroThumb {
-    width: 150px;
-    height: 150px;
-    border-radius: 12px;
-    background: var(--color-secondary-light);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    /* ✅ 라운드/잘림 안전 */
+}
+
+.heroThumbImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .heroChip {

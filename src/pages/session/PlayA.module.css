@@ -1,0 +1,261 @@
+/* src/pages/session/PlayA.module.css */
+.root {
+    min-height: 100vh;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 10px 14px 12px;
+}
+
+.backBtn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.headerCenter {
+    margin-top: -38px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.headerTitle {
+    font-weight: 900;
+    letter-spacing: -0.2px;
+    font-size: 16px;
+    color: #111;
+}
+
+.headerTime {
+    font-size: 12px;
+    opacity: 0.55;
+    margin-top: 2px;
+}
+
+.endBtn {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    height: 30px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 6px;
+    background: #cfd8e3;
+    color: #223;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.progressWrap {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.progressTrack {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--color-secondary);
+}
+
+.progressText {
+    font-size: 12px;
+    font-weight: 800;
+    opacity: 0.55;
+}
+
+/* Body */
+.page {
+    flex: 1;
+    padding: 14px 14px 0;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.loading {
+    padding: 12px 2px;
+    opacity: 0.7;
+}
+
+.scenarioCard {
+    background: #4b4f53;
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 14px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10);
+}
+
+.scenarioLabel {
+    font-size: 12px;
+    font-weight: 900;
+    opacity: 0.9;
+    margin-bottom: 6px;
+}
+
+.scenarioDesc {
+    font-size: 12px;
+    line-height: 1.45;
+    opacity: 0.9;
+}
+
+.chat {
+    padding: 14px 0 180px;
+    /* bottom mic 공간 */
+    overflow: auto;
+}
+
+.bubbleRow {
+    display: flex;
+    margin-top: 12px;
+}
+
+.left {
+    justify-content: flex-start;
+}
+
+.right {
+    justify-content: flex-end;
+}
+
+.bubble {
+    max-width: 78%;
+    border-radius: 10px;
+    padding: 12px 12px 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+
+.bubbleAi {
+    background: #e6eef6;
+    color: #111;
+}
+
+.bubbleMe {
+    background: #9fb3c3;
+    color: #111;
+}
+
+.bubbleText {
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 600;
+}
+
+.translateBtn {
+    margin-top: 6px;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 800;
+    opacity: 0.55;
+    cursor: pointer;
+}
+
+/* Bottom mic */
+.bottom {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    padding: 18px 14px 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: grid;
+    place-items: center;
+}
+
+.micHint {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.6;
+    margin-bottom: 12px;
+}
+
+.micBtn {
+    width: 62px;
+    height: 62px;
+    border-radius: 999px;
+    border: 0;
+    background: #3e4245;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.micBtn:active {
+    transform: translateY(1px);
+}
+
+.micBtnRecording {
+    background: #c9d7e6;
+    color: #2a3a48;
+}
+
+.micBtnBusy {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.micBars {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    height: 26px;
+}
+
+.micBars span {
+    width: 6px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.micBars span:nth-child(1) {
+    height: 14px;
+}
+
+.micBars span:nth-child(2) {
+    height: 24px;
+}
+
+.micBars span:nth-child(3) {
+    height: 18px;
+}
+
+.homeIndicator {
+    width: 140px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    margin-top: 14px;
+}
+
+.translationText {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: rgba(0, 0, 0, 0.55);
+}
