@@ -1,0 +1,15 @@
+.thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    background: var(--color-secondary-light);
+    /* E2EAF1 */
+    flex-shrink: 0;
+}
+
+.thumbImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}

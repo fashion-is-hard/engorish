@@ -1,0 +1,114 @@
+.root {
+    min-height: 100vh;
+    background: var(--color-bg);
+}
+
+/* AppBar */
+.appBar {
+    height: 56px;
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    align-items: center;
+
+    padding: 0 8px;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.backBtn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.backBtn:active {
+    transform: translateY(1px);
+}
+
+.title {
+    text-align: center;
+    color: var(--color-text);
+}
+
+.page {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.sectionTitle {
+    margin: 12px 0 12px;
+    color: var(--color-text);
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.tab {
+    height: 34px;
+    min-width: 72px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    cursor: pointer;
+    color: var(--color-secondary);
+}
+
+.tabActive {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: #fff;
+}
+
+/* Grid cards */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.cardBtn {
+    text-align: left;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    background: var(--color-secondary-light);
+    margin-bottom: 12px;
+}
+
+.cardTitle {
+    color: var(--color-text);
+}
+
+/* Loading */
+.loading {
+    margin-top: 12px;
+    color: var(--color-primary-light);
+}

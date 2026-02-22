@@ -8,6 +8,14 @@ import {
   ScenarioDetail,
   ScenarioGoalRow,
 } from "@/lib/scenarioApi";
+import styles from "./ScenarioPreparePage.module.css";
+
+type NavState = {
+  categoryTitle?: string; // "학교"
+  packageTitle?: string;  // "팀프로젝트"
+} | null;
+
+const SPEEDS: SessionSettings["speech_rate"][] = [0.8, 1.0, 1.2, 1.5];
 
 export default function ScenarioPreparePage() {
   const { scenarioId } = useParams();
@@ -17,10 +25,12 @@ export default function ScenarioPreparePage() {
   const nav = useNavigate();
   const base = getBasePath(loc.pathname);
   const variant = getVariantFromPath(loc.pathname); // "A" | "B"
+  const navState = (loc.state ?? null) as NavState;
 
   const [loading, setLoading] = useState(true);
   const [scenario, setScenario] = useState<ScenarioDetail | null>(null);
   const [goalRows, setGoalRows] = useState<ScenarioGoalRow[]>([]);
+  const [starting, setStarting] = useState(false);
 
   const [settings, setSettings] = useState<SessionSettings>({
     correction_mode: false,
@@ -39,25 +49,36 @@ export default function ScenarioPreparePage() {
   useEffect(() => {
     if (!Number.isFinite(sid)) return;
 
+    let mounted = true;
+
     (async () => {
       setLoading(true);
       try {
         const s = await getScenarioById(sid);
+        if (!mounted) return;
         setScenario(s);
 
         const g = await getGoalsByScenarioId(sid);
+        if (!mounted) return;
         setGoalRows(g);
       } catch (e: any) {
         alert(e?.message ?? "시나리오 로드 실패");
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, [sid]);
 
   if (!Number.isFinite(sid)) return <div style={{ padding: 24 }}>잘못된 scenarioId</div>;
 
   async function onStart() {
+    if (!scenario || starting) return;
+
+    setStarting(true);
     try {
       const sessionId = await createSession({
         variant,
@@ -67,94 +88,232 @@ export default function ScenarioPreparePage() {
       nav(`${base}/session/${sessionId}/play`);
     } catch (e: any) {
       alert(e?.message ?? "세션 생성 실패");
+    } finally {
+      setStarting(false);
     }
   }
 
+  const topChip = navState?.categoryTitle?.trim();
+  const subTitle = navState?.packageTitle?.trim();
+
   return (
-    <div style={{ padding: 24 }}>
-      <button onClick={() => nav(-1)} style={{ marginBottom: 12 }}>
-        ← 뒤로
-      </button>
+    <div className={styles.root}>
+      {/* Header (back only) */}
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={() => nav(-1)} aria-label="뒤로가기">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 18L9 12L15 6"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
 
-      {loading && <div>불러오는 중...</div>}
+      <div className={styles.page}>
+        {loading && <div className={`t-body-14-r ${styles.loading}`}>불러오는 중...</div>}
 
-      {!loading && scenario && (
-        <>
-          <h2>{scenario.title}</h2>
-          {scenario.one_liner && <p style={{ opacity: 0.85 }}>{scenario.one_liner}</p>}
+        {!loading && scenario && (
+          <>
+            {/* Hero */}
+            <div className={styles.hero}>
+              <div className={styles.heroThumb} />
+              {topChip && <div className={`t-cap-12-m ${styles.heroChip}`}>{topChip}</div>}
+              <div className={`t-title-24-b ${styles.heroTitle}`}>{scenario.title}</div>
+              {subTitle && <div className={`t-body-14-r ${styles.heroSub}`}>{subTitle}</div>}
+            </div>
 
-          {variant === "A" ? (
-            <>
-              <h3>예시 표현</h3>
-              <ul>
-                {examplePhrases.slice(0, 3).map((p, i) => (
-                  <li key={i}>{p}</li>
-                ))}
+            {/* 시나리오 */}
+            <Section label="시나리오">
+              <div className={styles.card}>
+                <div className="t-body-16-r">
+                  {scenario.one_liner ?? "이 시나리오 설명이 아직 없습니다."}
+                </div>
+              </div>
+            </Section>
+
+            {/* ✅ 분기: A=유용한표현 / B=대화목적(목표) */}
+            {variant === "B" ? (
+              <Section label="목표">
+                <div className={styles.card}>
+                  {goalRows.slice(0, 3).length === 0 ? (
+                    <div className="t-body-14-r" style={{ color: "var(--color-primary-light)" }}>
+                      (이 시나리오에 goal이 아직 없어요)
+                    </div>
+                  ) : (
+                    <div className={styles.goalList}>
+                      {goalRows.slice(0, 3).map((g) => (
+                        <div key={g.goal_id} className={styles.goalRow}>
+                          <span className={styles.goalCheck}>✓</span>
+                          <span className="t-body-16-r">{g.goal_text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Section>
+            ) : (
+              <Section label="유용한 표현">
+                <div className={styles.card}>
+                  {examplePhrases.slice(0, 3).length === 0 ? (
+                    <div className="t-body-14-r" style={{ color: "var(--color-primary-light)" }}>
+                      예시 표현이 아직 없습니다.
+                    </div>
+                  ) : (
+                    examplePhrases.slice(0, 3).map((p, i) => (
+                      <div key={i}>
+                        <div className={styles.phraseItem}>
+                          <div className={`t-body-16-r ${styles.phraseEn}`}>{p}</div>
+                          {/* KO는 데이터 없어서 생략 (추후 컬럼 추가하면 같이 표시 가능) */}
+                        </div>
+                        {i < 2 && <div className={styles.phraseDivider} />}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </Section>
+            )}
+
+            {/* ✅ 대화설정: A/B 공통(스크샷 형태 통일) */}
+            <Section label="대화설정">
+              <div className={`${styles.card} ${styles.aSettingsCard}`}>
+                {/* 교정 모드: 토글 + ON/OFF 텍스트 */}
+                <div className={styles.aSetRow}>
+                  <div className="t-body-16-r">교정 모드</div>
+
+                  <div className={styles.toggleWrap}>
+                    <span className={`t-body-14-r ${styles.toggleLabel} ${settings.correction_mode ? styles.toggleLabelOn : ""}`}>
+                      ON
+                    </span>
+
+                    <button
+                      type="button"
+                      className={[styles.toggle, settings.correction_mode ? styles.toggleOn : ""].join(" ")}
+                      onClick={() => setSettings((s) => ({ ...s, correction_mode: !s.correction_mode }))}
+                      aria-label="교정 모드 토글"
+                      aria-pressed={settings.correction_mode}
+                    >
+                      <span className={styles.knob} />
+                    </button>
+
+                    <span className={`t-body-14-r ${styles.toggleLabel} ${!settings.correction_mode ? styles.toggleLabelOff : ""}`}>
+                      OFF
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.aDivider} />
+
+                {/* 난이도: 둘 다 primary로 활성화, 기본은 basic(이미 state 기본값) */}
+                <div className={styles.aSetRow}>
+                  <div className="t-body-16-r">난이도 선택</div>
+                  <div className={styles.levelGroup}>
+                    <button
+                      type="button"
+                      className={[styles.levelBtn, settings.difficulty === "basic" ? styles.levelBtnActive : ""].join(" ")}
+                      onClick={() => setSettings((s) => ({ ...s, difficulty: "basic" }))}
+                    >
+                      Basic
+                    </button>
+                    <button
+                      type="button"
+                      className={[styles.levelBtn, settings.difficulty === "hard" ? styles.levelBtnActive : ""].join(" ")}
+                      onClick={() => setSettings((s) => ({ ...s, difficulty: "hard" }))}
+                    >
+                      Intermediate
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.aDivider} />
+
+                {/* 질문 재생 속도: 그대로 */}
+                <div className={styles.aSliderBlock}>
+                  <div className={styles.aSliderTop}>
+                    <div className="t-body-16-r">질문 재생 속도</div>
+                  </div>
+
+                  <div className={styles.aTicks}>
+                    {SPEEDS.map((v) => (
+                      <div
+                        key={v}
+                        className={[
+                          "t-body-14-r",
+                          styles.aTickLabel,
+                          settings.speech_rate === v ? styles.aTickLabelActive : "",
+                        ].join(" ")}
+                        onClick={() => setSettings((s) => ({ ...s, speech_rate: v }))}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {v.toFixed(1)}
+                      </div>
+                    ))}
+                  </div>
+
+                  <input
+                    className={styles.aRange}
+                    type="range"
+                    min={0}
+                    max={SPEEDS.length - 1}
+                    step={1}
+                    value={SPEEDS.indexOf(settings.speech_rate)}
+                    onChange={(e) => {
+                      const idx = Number(e.target.value);
+                      const v = SPEEDS[idx] ?? 1.0;
+                      setSettings((s) => ({ ...s, speech_rate: v }));
+                    }}
+                  />
+                </div>
+              </div>
+            </Section>
+
+            {/* 안내 박스 */}
+            <div className={styles.infoBox}>
+              <div className={`t-body-16-m ${styles.infoTitle}`}>마이크 사용권한</div>
+              <ul className={`t-body-14-r ${styles.bullets}`}>
+                <li>AI와 대화를 나누기 위해서는 마이크 사용 권한이 필요해요.</li>
+                <li>말이 끝나면 반드시 마이크 버튼을 다시 눌러주세요.</li>
               </ul>
-            </>
-          ) : (
-            <>
-              <h3>목표</h3>
-              <ol>
-                {goalRows.slice(0, 3).map((g) => (
-                  <li key={g.goal_id}>{g.goal_text}</li>
-                ))}
-              </ol>
-              {goalRows.length === 0 && (
-                <div style={{ opacity: 0.7 }}>(이 시나리오에 goal이 아직 없어요)</div>
-              )}
-            </>
-          )}
 
-          <h3 style={{ marginTop: 16 }}>대화 설정</h3>
+              <div style={{ height: 12 }} />
 
-          <label style={{ display: "block", marginTop: 8 }}>
-            <input
-              type="checkbox"
-              checked={settings.correction_mode}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, correction_mode: e.target.checked }))
-              }
-            />{" "}
-            교정모드
-          </label>
+              <div className={`t-body-16-m ${styles.infoTitle}`}>대화 종료</div>
+              <ul className={`t-body-14-r ${styles.bullets}`}>
+                <li>대화는 최대 20턴이에요. 20턴을 채우면 대화가 자동으로 종료돼요.</li>
+                <li>그 전에 대화를 종료하고 싶으면 종료 버튼을 눌러주세요.</li>
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
 
-          <div style={{ marginTop: 8 }}>
-            난이도:{" "}
-            <select
-              value={settings.difficulty}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, difficulty: e.target.value as any }))
-              }
-            >
-              <option value="basic">Basic</option>
-              <option value="hard">Hard</option>
-            </select>
-          </div>
+      {/* Bottom CTA */}
+      <div className={styles.bottomBar}>
+        <button
+          className={[
+            "t-btn-14",
+            styles.ctaBtn,
+            !scenario || loading || starting ? styles.ctaBtnDisabled : "",
+          ].join(" ")}
+          disabled={!scenario || loading || starting}
+          onClick={onStart}
+        >
+          {starting ? "세션 준비 중..." : "대화 시작하기"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
-          <div style={{ marginTop: 8 }}>
-            발화 속도:{" "}
-            <select
-              value={settings.speech_rate}
-              onChange={(e) =>
-                setSettings((s) => ({
-                  ...s,
-                  speech_rate: Number(e.target.value) as any,
-                }))
-              }
-            >
-              <option value={0.8}>0.8</option>
-              <option value={1.0}>1.0</option>
-              <option value={1.2}>1.2</option>
-              <option value={1.5}>1.5</option>
-            </select>
-          </div>
-
-          <button onClick={onStart} style={{ marginTop: 16 }}>
-            대화 시작하기
-          </button>
-        </>
-      )}
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className={styles.section}>
+      <div className={`t-cap-12-m ${styles.sectionLabel}`}>{label}</div>
+      {children}
     </div>
   );
 }

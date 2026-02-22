@@ -7,6 +7,7 @@ import {
   GenderUi,
 } from "@/lib/auth";
 import { getBasePath } from "@/lib/abVariant";
+import styles from "./SignUpPage.module.css";
 
 export default function SignUpPage() {
   const nav = useNavigate();
@@ -21,6 +22,7 @@ export default function SignUpPage() {
   const [exchangeStatus, setExchangeStatus] =
     useState<ExchangeStatusDb>("pre_departure");
 
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const canSubmit = useMemo(() => {
@@ -28,9 +30,10 @@ export default function SignUpPage() {
       email.trim().includes("@") &&
       password.length >= 6 &&
       fullName.trim().length > 0 &&
-      age > 0
+      age > 0 &&
+      agreePrivacy
     );
-  }, [email, password, fullName, age]);
+  }, [email, password, fullName, age, agreePrivacy]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,90 +59,149 @@ export default function SignUpPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 520, margin: "0 auto" }}>
-      <h1 style={{ marginBottom: 16 }}>회원가입</h1>
-
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
-        <label style={{ display: "grid", gap: 6 }}>
-          이메일
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@example.com"
-            autoComplete="email"
-          />
-        </label>
-
-        <label style={{ display: "grid", gap: 6 }}>
-          비밀번호
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="6자 이상"
-            type="password"
-            autoComplete="new-password"
-          />
-        </label>
-
-        <label style={{ display: "grid", gap: 6 }}>
-          성명
-          <input
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="홍길동"
-          />
-        </label>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label style={{ display: "grid", gap: 6 }}>
-            성별
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value as GenderUi)}
+    <div className={styles.root}>
+      <div className={styles.container}>
+        {/* AppBar */}
+        <div className={styles.appBar}>
+          <button
+            type="button"
+            className={styles.backBtn}
+            onClick={() => nav(-1)}
+            aria-label="뒤로가기"
+          >
+            {/* simple left chevron */}
+            <svg
+              className={styles.backIcon}
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <option value="선택안함">선택안함</option>
-              <option value="여">여</option>
-              <option value="남">남</option>
-              <option value="기타">기타</option>
-            </select>
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            나이
-            <input
-              type="number"
-              value={age}
-              min={1}
-              onChange={(e) => setAge(Number(e.target.value))}
-            />
-          </label>
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
 
-        <label style={{ display: "grid", gap: 6 }}>
-          교환 상태
-          <select
-            value={exchangeStatus}
-            onChange={(e) => setExchangeStatus(e.target.value as ExchangeStatusDb)}
-          >
-            {EXCHANGE_STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {/* Content */}
+        <div className={styles.content}>
+          <h1 className={`t-title-24-b ${styles.title}`}>회원가입</h1>
 
-        <button
-          type="submit"
-          disabled={!canSubmit || loading}
-          style={{ height: 44, marginTop: 8 }}
-        >
-          {loading ? "가입 중..." : "가입하기"}
-        </button>
-      </form>
+          <form onSubmit={onSubmit} className={styles.form}>
+            <input
+              className={`t-body-16-r ${styles.input}`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="이메일"
+              autoComplete="email"
+              inputMode="email"
+            />
 
-      <div style={{ marginTop: 12 }}>
-        이미 계정이 있나요? <Link to={`${base}/login`}>로그인</Link>
+            <input
+              className={`t-body-16-r ${styles.input}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="비밀번호"
+              type="password"
+              autoComplete="new-password"
+            />
+
+            <input
+              className={`t-body-16-r ${styles.input}`}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="이름"
+            />
+
+            <div className={styles.row2}>
+              <select
+                className={`t-body-16-r ${styles.select}`}
+                value={gender}
+                onChange={(e) => setGender(e.target.value as GenderUi)}
+                aria-label="성별"
+              >
+                <option value="선택안함">성별</option>
+                <option value="여">여</option>
+                <option value="남">남</option>
+                <option value="기타">기타</option>
+              </select>
+
+              <input
+                className={`t-body-16-r ${styles.input}`}
+                type="number"
+                value={age}
+                min={1}
+                onChange={(e) => setAge(Number(e.target.value))}
+                placeholder="나이"
+                aria-label="나이"
+              />
+            </div>
+
+            <select
+              className={`t-body-16-r ${styles.select}`}
+              value={exchangeStatus}
+              onChange={(e) =>
+                setExchangeStatus(e.target.value as ExchangeStatusDb)
+              }
+              aria-label="현재 어떤 상태인가요?"
+            >
+              {EXCHANGE_STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+
+            {/* 약관 동의 row */}
+            <div className={styles.agreeRow}>
+              <label className={`t-body-14-r ${styles.agreeLeft}`}>
+                <input
+                  className={styles.checkbox}
+                  type="checkbox"
+                  checked={agreePrivacy}
+                  onChange={(e) => setAgreePrivacy(e.target.checked)}
+                />
+                <span>
+                  <span style={{ color: "var(--color-secondary)" }}>[필수]</span>{" "}
+                  개인정보수집에 동의합니다
+                </span>
+              </label>
+
+              <a className={`t-body-14-r ${styles.policyLink}`} href="#">
+                개인정보 처리방침
+              </a>
+            </div>
+
+            {/* 아래 링크 */}
+            <div className={`t-body-14-r ${styles.footer}`}>
+              이미 계정이 있나요?
+              <Link className={`t-link-14 ${styles.link}`} to={`${base}/login`}>
+                로그인
+              </Link>
+            </div>
+
+            {/* form 안에 버튼을 두되, 실제 위치는 bottomBar로 고정 */}
+            <div className={styles.bottomBar}>
+              <button
+                type="submit"
+                disabled={!canSubmit || loading}
+                className={[
+                  "t-btn-14",
+                  styles.button,
+                  canSubmit && !loading
+                    ? styles.buttonEnabled
+                    : styles.buttonDisabled,
+                ].join(" ")}
+              >
+                {loading ? "가입 중..." : "회원가입"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

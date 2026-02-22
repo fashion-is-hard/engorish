@@ -1,0 +1,144 @@
+/* =========================
+   A2U (에이투지체) Font Setup
+   ========================= */
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-1Thin.woff2") format("woff2");
+    font-weight: 100;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-2ExtraLight.woff2") format("woff2");
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-3Light.woff2") format("woff2");
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-4Regular.woff2") format("woff2");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-5Medium.woff2") format("woff2");
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-6SemiBold.woff2") format("woff2");
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-7Bold.woff2") format("woff2");
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-8ExtraBold.woff2") format("woff2");
+    font-weight: 800;
+}
+
+@font-face {
+    font-family: "A2U";
+    src: url("../assets/fonts/에이투지체-9Black.woff2") format("woff2");
+    font-weight: 900;
+}
+
+/* Typography utility classes */
+.t-title-42-b {
+    font: var(--t-title-42-b);
+}
+
+.t-title-32-b {
+    font: var(--t-title-32-b);
+}
+
+.t-title-24-b {
+    font: var(--t-title-24-b);
+}
+
+.t-title-24-m {
+    font: var(--t-title-24-m);
+}
+
+.t-sub-20-b {
+    font: var(--t-sub-20-b);
+}
+
+.t-sub-20-m {
+    font: var(--t-sub-20-m);
+}
+
+.t-sub-18-b {
+    font: var(--t-sub-18-b);
+}
+
+.t-sub-18-sb {
+    font: var(--t-sub-18-sb);
+}
+
+.t-sub-18-m {
+    font: var(--t-sub-18-m);
+}
+
+.t-sub-18-r {
+    font: var(--t-sub-18-r);
+}
+
+.t-sub-16-sb {
+    font: var(--t-sub-16-sb);
+}
+
+.t-body-16-m {
+    font: var(--t-body-16-m);
+}
+
+.t-body-16-r {
+    font: var(--t-body-16-r);
+}
+
+.t-body-14-m {
+    font: var(--t-body-14-m);
+}
+
+.t-body-14-r {
+    font: var(--t-body-14-r);
+}
+
+.t-cap-12-m {
+    font: var(--t-cap-12-m);
+}
+
+.t-cap-12-r {
+    font: var(--t-cap-12-r);
+}
+
+.t-btn-14 {
+    font: var(--t-btn-14);
+}
+
+.t-link-14 {
+    font: var(--t-link-14);
+}
+
+.t-btn-12 {
+    font: var(--t-btn-12);
+}
+
+body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+}

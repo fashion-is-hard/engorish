@@ -1,0 +1,357 @@
+.root {
+    min-height: 100vh;
+    background: var(--color-bg);
+}
+
+.header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+}
+
+.backBtn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.backBtn:active {
+    transform: translateY(1px);
+}
+
+.page {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 8px 16px 110px;
+}
+
+.loading {
+    margin-top: 12px;
+    color: var(--color-primary-light);
+}
+
+.hero {
+    display: grid;
+    justify-items: center;
+    padding-top: 6px;
+    padding-bottom: 10px;
+}
+
+.heroThumb {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    background: var(--color-secondary-light);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.heroChip {
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: var(--color-secondary);
+    color: #fff;
+}
+
+.heroTitle {
+    margin-top: 10px;
+    color: var(--color-text);
+}
+
+.heroSub {
+    margin-top: 6px;
+    color: var(--color-primary-light);
+}
+
+.section {
+    margin-top: 14px;
+}
+
+.sectionLabel {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: var(--color-primary);
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    padding: 14px;
+}
+
+/* ✅ 목표 체크리스트 */
+.goalList {
+    display: grid;
+    gap: 14px;
+}
+
+.goalRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.goalCheck {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--color-primary);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* ✅ 유용한 표현 리스트 */
+.phraseItem {
+    padding: 12px 0;
+}
+
+.phraseDivider {
+    height: 1px;
+    background: rgba(62, 66, 69, 0.12);
+}
+
+.phraseEn {
+    color: var(--color-text);
+}
+
+/* ✅ 대화설정(스크샷 형태 통일) */
+.aSettingsCard {
+    padding: 14px;
+}
+
+.aSetRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.aPillGroup {
+    display: inline-flex;
+    gap: 10px;
+}
+
+.aPill {
+    height: 44px;
+    min-width: 80px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(62, 66, 69, 0.12);
+    background: #fff;
+    cursor: pointer;
+    color: var(--color-primary-light);
+}
+
+.aPillActive {
+    background: var(--color-secondary-light);
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+.aPillActiveDark {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+}
+
+.aDivider {
+    height: 2px;
+    background: rgba(175, 195, 210, 1);
+    /* Secondary */
+    margin: 18px 0;
+    border-radius: 999px;
+}
+
+.aSliderBlock {
+    margin-top: 2px;
+}
+
+.aSliderTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.aTicks {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.aTickLabel {
+    color: var(--color-primary-light);
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.aTickLabelActive {
+    background: var(--color-secondary-light);
+    color: var(--color-primary);
+}
+
+.aRange {
+    width: 100%;
+    accent-color: var(--color-primary);
+}
+
+/* ✅ Info box */
+.infoBox {
+    margin-top: 14px;
+    background: var(--color-secondary-light);
+    border-radius: 10px;
+    padding: 14px;
+    color: var(--color-primary-light);
+}
+
+.infoTitle {
+    color: var(--color-text);
+    margin-bottom: 6px;
+}
+
+.bullets {
+    margin: 6px 0 0;
+    padding-left: 16px;
+}
+
+.bullets li {
+    margin: 6px 0;
+}
+
+/* ✅ Bottom CTA */
+.bottomBar {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background: var(--color-bg);
+    padding: 14px 16px 18px;
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.ctaBtn {
+    width: 100%;
+    height: 52px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.ctaBtn:active {
+    transform: translateY(1px);
+}
+
+.ctaBtnDisabled {
+    background: var(--color-secondary-light);
+    cursor: not-allowed;
+}
+
+/* ===== 교정모드: 토글 + ON/OFF 텍스트 ===== */
+.toggleWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggleLabel {
+    color: var(--color-primary-light);
+    opacity: 0.8;
+    min-width: 28px;
+    text-align: center;
+    transition: color 160ms ease, font-weight 160ms ease;
+}
+
+.toggleLabelOn {
+    color: var(--color-primary);
+    /* ✅ ON일 때 primary */
+    font-weight: 700;
+}
+
+.toggleLabelOff {
+    color: var(--color-primary);
+    /* ✅ OFF일 때 primary */
+    font-weight: 700;
+}
+
+/* 기본 토글 (OFF 상태) */
+.toggle {
+    position: relative;
+    width: 56px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid rgba(62, 66, 69, 0.18);
+    background: var(--color-secondary-light);
+    /* OFF = 연한색 */
+    cursor: pointer;
+    padding: 0;
+    transition: background 160ms ease, border-color 160ms ease;
+}
+
+/* ON일 때 배경 진한색 */
+.toggleOn {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* knob 기본 위치 = OFF → 오른쪽 */
+.knob {
+    position: absolute;
+    top: 50%;
+    left: calc(100% - 4px - 24px);
+    /* 기본 오른쪽 */
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: #fff;
+    transform: translateY(-50%);
+    transition: left 160ms ease;
+}
+
+/* ON일 때 → 왼쪽 */
+.toggleOn .knob {
+    left: 4px;
+}
+
+/* ===== 난이도 버튼: 클릭 시 primary로 활성화 ===== */
+.levelGroup {
+    display: inline-flex;
+    gap: 10px;
+}
+
+.levelBtn {
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(62, 66, 69, 0.16);
+    background: #fff;
+    cursor: pointer;
+    color: var(--color-primary-light);
+}
+
+.levelBtnActive {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+}

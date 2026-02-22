@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getBasePath } from "@/lib/abVariant";
 import { getScenariosByPackage, ScenarioRow } from "@/lib/contentApi";
+import styles from "./ScenarioListPage.module.css";
+
+type NavState = {
+  packageTitle?: string;
+} | null;
 
 export default function ScenarioListPage() {
   const { packageId } = useParams();
@@ -11,22 +16,32 @@ export default function ScenarioListPage() {
   const loc = useLocation();
   const base = getBasePath(loc.pathname);
 
+  const navState = (loc.state ?? null) as NavState;
+
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<ScenarioRow[]>([]);
 
   useEffect(() => {
     if (!Number.isFinite(packageIdNum)) return;
 
+    let mounted = true;
+
     (async () => {
       try {
+        setLoading(true);
         const rows = await getScenariosByPackage(packageIdNum);
+        if (!mounted) return;
         setItems(rows);
       } catch (e: any) {
         alert(e?.message ?? "시나리오 로드 실패");
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, [packageIdNum]);
 
   if (!Number.isFinite(packageIdNum)) {
@@ -34,44 +49,78 @@ export default function ScenarioListPage() {
   }
 
   const firstScenarioId = items[0]?.scenario_id;
+  const canStart = !loading && !!firstScenarioId;
+
+  const headerTitle = useMemo(() => {
+    return navState?.packageTitle?.trim() || "패키지";
+  }, [navState]);
 
   return (
-    <div style={{ padding: 24 }}>
-      <button onClick={() => nav(-1)} style={{ marginBottom: 12 }}>
-        ← 뒤로
-      </button>
+    <div className={styles.root}>
+      {/* AppBar */}
+      <div className={styles.appBar}>
+        <button className={styles.backBtn} onClick={() => nav(-1)} aria-label="뒤로가기">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 18L9 12L15 6"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
 
-      <h2>시나리오</h2>
-      {loading && <div>불러오는 중...</div>}
+        <div className={`t-sub-18-sb ${styles.title}`}>{headerTitle}</div>
+        <div />
+      </div>
 
-      {!loading && items.length === 0 && (
-        <div style={{ opacity: 0.7 }}>이 패키지에 시나리오가 없습니다.</div>
-      )}
+      <div className={styles.page}>
+        {loading && <div className={`t-body-14-r ${styles.loading}`}>불러오는 중...</div>}
 
-      {!loading && items.length > 0 && (
-        <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-          <button onClick={() => nav(`${base}/scenario/${firstScenarioId}/prepare`)}>
-            첫 번째 시나리오 시작하기
-          </button>
-        </div>
-      )}
+        {!loading && items.length === 0 && (
+          <div className={`t-body-14-r ${styles.loading}`}>이 패키지에 시나리오가 없습니다.</div>
+        )}
 
-      {/* 목록은 보여주되 버튼은 없애고 "순서 안내"만 */}
-      <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
-        {items.map((s, idx) => (
-          <div
-            key={s.scenario_id}
-            style={{ border: "1px solid #eee", borderRadius: 12, padding: 16 }}
-          >
-            <div style={{ fontWeight: 800 }}>
-              {idx + 1}. {s.title}
-            </div>
-            {s.one_liner && <div style={{ opacity: 0.85, marginTop: 6 }}>{s.one_liner}</div>}
-            <div style={{ fontSize: 12, opacity: 0.6, marginTop: 10 }}>
-              순서대로 진행됩니다
-            </div>
+        {/* Step list */}
+        {!loading && items.length > 0 && (
+          <div className={styles.list}>
+            {items.map((s, idx) => (
+              <div key={s.scenario_id} className={styles.row}>
+                <div className={`t-body-14-m ${styles.stepCircle}`}>{idx + 1}</div>
+
+                <div className={styles.card}>
+                  {/* ✅ 썸네일 파일 없어도 회색 박스 */}
+                  <div className={styles.thumb} />
+
+                  <div className={`t-sub-18-sb ${styles.itemTitle}`}>{s.title}</div>
+
+                  {s.one_liner && (
+                    <div className={`t-body-14-r ${styles.itemDesc}`}>{s.one_liner}</div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+      </div>
+
+      {/* Bottom CTA */}
+      <div className={styles.bottomBar}>
+        <button
+          className={[
+            "t-btn-14",
+            styles.ctaBtn,
+            canStart ? "" : styles.ctaBtnDisabled,
+          ].join(" ")}
+          disabled={!canStart}
+          onClick={() => {
+            if (!firstScenarioId) return;
+            nav(`${base}/scenario/${firstScenarioId}/prepare`);
+          }}
+        >
+          순서대로 진행하기
+        </button>
       </div>
     </div>
   );
