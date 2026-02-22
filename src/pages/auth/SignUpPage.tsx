@@ -1,6 +1,6 @@
 // src/pages/auth/SignUpPage.tsx
 import { useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   signUpWithProfile,
   EXCHANGE_STATUS_OPTIONS,
@@ -167,22 +167,22 @@ export default function SignUpPage() {
                 </span>
               </label>
 
-              <a className={`t-body-14-r ${styles.policyLink}`} href="#">
+              {/* ✅ 정책 페이지로 이동 */}
+              <button
+                type="button"
+                className={`t-body-14-r ${styles.policyLinkBtn}`}
+                onClick={() => nav("/privacy")}
+              >
                 개인정보 처리방침
-              </a>
+              </button>
             </div>
 
-            <div className={`t-body-14-r ${styles.footer}`}>
-              이미 계정이 있나요?
-              <Link className={`t-link-14 ${styles.link}`} to="/login">
-                로그인
-              </Link>
-            </div>
+            {/* ✅ "이미 계정이 있나요? 로그인" 삭제 */}
           </form>
         </div>
       </div>
 
-      {/* ✅ 하단 고정 CTA: form 밖에 두고 form 연결 */}
+      {/* ✅ 하단 고정 CTA */}
       <div className={styles.bottomBar} role="presentation">
         <div className={styles.bottomInner}>
           <button
@@ -192,7 +192,9 @@ export default function SignUpPage() {
             className={[
               "t-btn-14",
               styles.button,
-              canSubmit && !loading ? styles.buttonEnabled : styles.buttonDisabled,
+              canSubmit && !loading
+                ? styles.buttonEnabled
+                : styles.buttonDisabled,
             ].join(" ")}
           >
             {loading ? "가입 중..." : "회원가입"}

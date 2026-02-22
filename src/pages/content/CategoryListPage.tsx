@@ -9,6 +9,11 @@ import {
 } from "@/lib/contentApi";
 import styles from "./CategoryListPage.module.css";
 
+function getThumbSrc(thumbnailKey: string | null) {
+  if (!thumbnailKey) return null;
+  return `/thumbnails/${thumbnailKey}.png`;
+}
+
 export default function CategoryListPage() {
   const nav = useNavigate();
   const loc = useLocation();
@@ -35,11 +40,9 @@ export default function CategoryListPage() {
 
         if (!mounted) return;
 
-        // is_active / sort_order는 getCategories 안에서 처리되어 있을 수도 있음
         const activeRows = rows.filter((r) => r.is_active !== false);
         setCategories(activeRows);
 
-        // 첫 탭 자동 선택
         const firstId = activeRows[0]?.category_id ?? null;
         setActiveCategoryId(firstId);
       } catch (e: any) {
@@ -83,11 +86,22 @@ export default function CategoryListPage() {
     return c?.title ?? "학습영역";
   }, [categories, activeCategoryId]);
 
+  // ✅ public/thumbnails/{thumbnail_key}.png 로 매핑
+  function getThumbSrc(thumbnailKey?: string | null) {
+    const key = (thumbnailKey ?? "").trim();
+    if (!key) return ""; // 썸네일 없으면 빈값 → fallback div 보여줌
+    return `/thumbnails/${key}.png`;
+  }
+
   return (
     <div className={styles.root}>
       {/* AppBar */}
       <div className={styles.appBar}>
-        <button className={styles.backBtn} onClick={() => nav(-1)} aria-label="뒤로가기">
+        <button
+          className={styles.backBtn}
+          onClick={() => nav(-1)}
+          aria-label="뒤로가기"
+        >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path
               d="M15 18L9 12L15 6"
@@ -104,8 +118,10 @@ export default function CategoryListPage() {
       </div>
 
       <div className={styles.page}>
-        {/* 섹션 타이틀(캠퍼스영어 대신 선택된 카테고리명 표시) */}
-        <div className={`t-title-24-b ${styles.sectionTitle}`}>{activeTitle}</div>
+        {/* 섹션 타이틀 */}
+        <div className={`t-title-24-b ${styles.sectionTitle}`}>
+          {activeTitle}
+        </div>
 
         {/* Tabs from categories */}
         <div className={styles.tabs}>
@@ -134,22 +150,43 @@ export default function CategoryListPage() {
 
         {/* Grid cards = packages */}
         <div className={styles.grid}>
-          {packages.map((p) => (
-            <button
-              key={p.package_id}
-              className={styles.cardBtn}
-              onClick={() => nav(`${base}/package/${p.package_id}`, { state: { packageTitle: p.title } })}
-            >
-              <div className={styles.card}>
-                {/* ✅ 썸네일 없어도 회색 박스 */}
-                <div className={styles.thumb} />
-                <div className={`t-sub-18-sb ${styles.cardTitle}`}>{p.title}</div>
-              </div>
-            </button>
-          ))}
+          {packages.map((p) => {
+            const thumbSrc = getThumbSrc(p.thumbnail_key);
+
+            return (
+              <button
+                key={p.package_id}
+                className={styles.cardBtn}
+                onClick={() =>
+                  nav(`${base}/package/${p.package_id}`, {
+                    state: { packageTitle: p.title },
+                  })
+                }
+              >
+                <div className={styles.card}>
+                  {thumbSrc ? (
+                    <img
+                      src={thumbSrc}
+                      alt={`${p.title} thumbnail`}
+                      className={styles.thumbImg}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className={styles.thumb} />
+                  )}
+
+                  <div className={`t-sub-18-sb ${styles.cardTitle}`}>
+                    {p.title}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        {/* 패키지 없을 때(조용히) */}
         {!pkgLoading && !loading && packages.length === 0 && (
           <div className={`t-body-14-r ${styles.loading}`}>
             아직 등록된 패키지가 없어요.

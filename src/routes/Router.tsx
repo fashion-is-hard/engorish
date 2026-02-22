@@ -14,8 +14,9 @@ import SessionPlayPage from "@/pages/play/SessionPlayPage";
 import SessionEndPageA from "@/pages/play/SessionEndPageA";
 import SessionEndPageB from "@/pages/play/SessionEndPageB";
 
-// ✅ 이걸 새로 만들 예정(아래에서 다음 파일로 요청할게)
 import RequireAuthAndVariant from "@/routes/RequireAuth";
+
+import PrivacyPolicyPage from "@/pages/auth/PrivacyPolicyPage";
 
 export default function AppRouter() {
   return (
@@ -27,6 +28,7 @@ export default function AppRouter() {
         {/* ✅ 공용 인증 라우트 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
         {/* (선택) 예전 주소로 들어오면 공용으로 리다이렉트 */}
         <Route path="/a/login" element={<Navigate to="/login" replace />} />

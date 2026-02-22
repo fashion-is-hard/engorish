@@ -40,11 +40,10 @@ export default function HomePage() {
   const base = getBasePath(loc.pathname);
 
   const [loading, setLoading] = useState(true);
-
   const [inProgress, setInProgress] = useState<SessionRow | null>(null);
 
-  const [pkgTitle, setPkgTitle] = useState<string>(""); // "팀 프로젝트"
-  const [steps, setSteps] = useState<ScenarioRow[]>([]); // 3개 카드
+  const [pkgTitle, setPkgTitle] = useState<string>("");
+  const [steps, setSteps] = useState<ScenarioRow[]>([]);
   const [currentScenarioId, setCurrentScenarioId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -59,7 +58,6 @@ export default function HomePage() {
           return;
         }
 
-        // 1) 진행중 세션
         const selectCols =
           "session_id,user_id,variant,scenario_id,status,started_at,ended_at,turn_count,word_count,result";
 
@@ -78,7 +76,6 @@ export default function HomePage() {
 
         setInProgress(sess);
 
-        // 진행중 없으면 온보딩 UI만
         if (!sess?.scenario_id) {
           setPkgTitle("");
           setSteps([]);
@@ -88,10 +85,11 @@ export default function HomePage() {
 
         setCurrentScenarioId(sess.scenario_id);
 
-        // 2) scenario → package_id
         const { data: scen, error: e2 } = await supabase
           .from("scenarios")
-          .select("scenario_id,package_id,title,one_liner,sort_order,is_active,thumbnail_key")
+          .select(
+            "scenario_id,package_id,title,one_liner,sort_order,is_active,thumbnail_key"
+          )
           .eq("scenario_id", sess.scenario_id)
           .maybeSingle();
 
@@ -100,7 +98,6 @@ export default function HomePage() {
 
         const packageId = scen.package_id as number;
 
-        // 3) package title
         const { data: pkg, error: e3 } = await supabase
           .from("packages")
           .select("package_id,category_id,title,is_active")
@@ -110,10 +107,11 @@ export default function HomePage() {
         if (e3) throw e3;
         setPkgTitle(String(pkg?.title ?? ""));
 
-        // 4) package의 시나리오 목록(스텝 카드)
         const { data: scens, error: e4 } = await supabase
           .from("scenarios")
-          .select("scenario_id,package_id,title,one_liner,sort_order,is_active,thumbnail_key")
+          .select(
+            "scenario_id,package_id,title,one_liner,sort_order,is_active,thumbnail_key"
+          )
           .eq("package_id", packageId)
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
@@ -156,7 +154,6 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: "100vh", background: "#FFFFFF" }}>
       {/* Top App Bar */}
-      {/* Top App Bar */}
       <div
         style={{
           height: headerHeight,
@@ -168,12 +165,13 @@ export default function HomePage() {
           padding: "0 18px",
         }}
       >
-        <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.3 }}>Engorish</div>
+        <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: -0.3 }}>
+          Engorish
+        </div>
 
         <button
           onClick={async () => {
             await supabase.auth.signOut();
-            // ✅ 공용 로그인으로 이동
             nav(`/login`, { replace: true });
           }}
           style={{
@@ -192,7 +190,6 @@ export default function HomePage() {
 
       {/* Body */}
       <div style={{ padding: 18 }}>
-        {/* 로딩 */}
         {loading && (
           <div style={{ opacity: 0.7, padding: "14px 2px" }}>불러오는 중...</div>
         )}
@@ -211,17 +208,31 @@ export default function HomePage() {
                 background: "#fff",
               }}
             >
-              <div style={{ textAlign: "center", fontWeight: 700, opacity: 0.8, marginBottom: 12 }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  fontWeight: 700,
+                  opacity: 0.8,
+                  marginBottom: 12,
+                }}
+              >
                 다양한 시나리오로 체험해보는 영어 회화
               </div>
 
-              <div
+              {/* ✅ 홈 썸네일 이미지 */}
+              <img
+                src="/thumbnails/home.png"
+                alt="Engorish home thumbnail"
                 style={{
+                  width: "100%",
                   height: 180,
                   borderRadius: 8,
                   background: "#E2EAF1",
                   marginBottom: 14,
+                  objectFit: "cover",
+                  display: "block",
                 }}
+                loading="eager"
               />
 
               <button
@@ -246,7 +257,6 @@ export default function HomePage() {
         {/* 학습 이후(진행중 세션 있음) */}
         {!loading && inProgress && (
           <>
-            {/* Row: 진행중인 롤플레잉 + 다른 목록 */}
             <div
               style={{
                 display: "flex",
@@ -255,7 +265,9 @@ export default function HomePage() {
                 marginTop: 6,
               }}
             >
-              <div style={{ fontSize: 14, opacity: 0.8 }}>진행중인 롤플레잉</div>
+              <div style={{ fontSize: 14, opacity: 0.8 }}>
+                진행중인 롤플레잉
+              </div>
 
               <button
                 onClick={() => nav(`${base}/category`)}
@@ -272,9 +284,10 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* 패키지 타이틀 + 진행 표시 */}
             <div style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: -0.2 }}>
+              <div
+                style={{ fontSize: 22, fontWeight: 900, letterSpacing: -0.2 }}
+              >
                 {pkgTitle || "팀 프로젝트"}
               </div>
 
@@ -312,16 +325,14 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 스텝 카드 리스트 */}
             <div style={{ marginTop: 18, display: "grid", gap: 18 }}>
               {(steps.length ? steps : fallbackSteps()).map((s, idx) => {
                 const isCurrent = currentScenarioId
                   ? s.scenario_id === currentScenarioId
                   : idx === 0;
 
-                // 스샷은 첫번째만 진하게 체크, 나머지는 연하게
                 const checkBg = isCurrent ? "#3E4245" : "#E2EAF1";
-                const checkIconColor = isCurrent ? "#ffffff" : "#ffffff";
+                const checkIconColor = "#ffffff";
                 const checkOpacity = isCurrent ? 1 : 0.75;
 
                 return (
@@ -334,8 +345,13 @@ export default function HomePage() {
                       alignItems: "start",
                     }}
                   >
-                    {/* 왼쪽 체크 아이콘 */}
-                    <div style={{ display: "grid", placeItems: "center", paddingTop: 14 }}>
+                    <div
+                      style={{
+                        display: "grid",
+                        placeItems: "center",
+                        paddingTop: 14,
+                      }}
+                    >
                       <div
                         style={{
                           width: 34,
@@ -347,8 +363,12 @@ export default function HomePage() {
                           opacity: checkOpacity,
                         }}
                       >
-                        {/* 체크 */}
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
                           <path
                             d="M20 6L9 17l-5-5"
                             stroke={checkIconColor}
@@ -360,10 +380,11 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* 카드 */}
                     <button
                       type="button"
-                      onClick={() => nav(`${base}/scenario/${s.scenario_id}/prepare`)}
+                      onClick={() =>
+                        nav(`${base}/scenario/${s.scenario_id}/prepare`)
+                      }
                       style={{
                         textAlign: "left",
                         border: "none",
@@ -390,15 +411,26 @@ export default function HomePage() {
                             marginBottom: 12,
                           }}
                           data-thumb-key={s.thumbnail_key ?? ""}
-                        // ✅ 나중에 이미지 붙일 자리:
-                        // 1) Supabase Storage public URL or signed URL을 만들어서 <img />로 교체
                         />
 
-                        <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -0.2 }}>
+                        <div
+                          style={{
+                            fontSize: 18,
+                            fontWeight: 900,
+                            letterSpacing: -0.2,
+                          }}
+                        >
                           {s.title}
                         </div>
 
-                        <div style={{ marginTop: 8, fontSize: 14, opacity: 0.8, lineHeight: 1.45 }}>
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 14,
+                            opacity: 0.8,
+                            lineHeight: 1.45,
+                          }}
+                        >
                           {s.one_liner ?? ""}
                         </div>
                       </div>
@@ -414,7 +446,6 @@ export default function HomePage() {
   );
 }
 
-/** ✅ 진행중 세션/패키지 로딩이 아직 안 잡혔을 때도 UI 깨지지 않게 임시 3개 */
 function fallbackSteps(): ScenarioRow[] {
   return [
     {

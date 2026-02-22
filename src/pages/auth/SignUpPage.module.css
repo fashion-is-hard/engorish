@@ -192,3 +192,18 @@
     background: var(--color-primary);
     color: #ffffff;
 }
+
+/* 기존 policyLink는 남겨도 되고, 아래를 추가하면 됨 */
+
+.policyLinkBtn {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--color-text);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.policyLinkBtn:hover {
+    text-decoration: underline;
+}
