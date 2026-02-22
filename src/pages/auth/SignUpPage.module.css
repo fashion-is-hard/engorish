@@ -1,3 +1,5 @@
+/* src/pages/auth/SignUpPage.module.css */
+
 .root {
     min-height: 100vh;
     background: var(--color-bg);
@@ -5,11 +7,15 @@
     justify-content: center;
 }
 
+/* 화면 중앙에 폼을 두되, 하단 CTA는 100vw로 깔릴 거라 container는 폼 폭만 책임 */
 .container {
     width: 100%;
     max-width: 420px;
     padding: 0;
-    /* 상단바 때문에 padding 분리 */
+
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ===== AppBar ===== */
@@ -49,8 +55,8 @@
 
 /* ===== Content ===== */
 .content {
-    padding: 16px 16px 96px;
-    /* 아래 고정 버튼 공간 확보 */
+    padding: 16px 16px calc(132px + env(safe-area-inset-bottom));
+    flex: 1;
 }
 
 .title {
@@ -122,17 +128,45 @@
     text-decoration: underline;
 }
 
+/* ===== Footer (이미 계정?) ===== */
+.footer {
+    margin-top: 14px;
+    text-align: center;
+    color: var(--color-text);
+}
+
+.link {
+    margin-left: 6px;
+    color: var(--color-secondary);
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
 /* ===== Bottom fixed CTA ===== */
 .bottomBar {
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
-    width: 100%;
 
-    padding: 14px 16px 18px;
+    width: 100vw;
     background: var(--color-bg);
 
-    /* 위에 살짝 그림자 */
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+
+    padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
+    z-index: 50;
+}
+
+/* CTA 내부 컨테이너: 모바일은 꽉, 데스크탑은 중앙 정렬 + max-width */
+.bottomInner {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
 }
 
 .button {
@@ -157,21 +191,4 @@
 .buttonEnabled {
     background: var(--color-primary);
     color: #ffffff;
-}
-
-/* ===== Footer (이미 계정?) ===== */
-.footer {
-    margin-top: 14px;
-    text-align: center;
-    color: var(--color-text);
-}
-
-.link {
-    margin-left: 6px;
-    color: var(--color-secondary);
-    text-decoration: none;
-}
-
-.link:hover {
-    text-decoration: underline;
 }

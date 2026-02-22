@@ -1,4 +1,4 @@
-// SignUpPage.tsx
+// src/pages/auth/SignUpPage.tsx
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -48,7 +48,6 @@ export default function SignUpPage() {
         exchangeStatus,
       });
 
-      // ✅ A/B는 DB에서 “사용자 모르게” 이미 배정됨(트리거/서버 로직)
       alert("회원가입 완료! 이제 로그인 해주세요.");
       nav("/login", { replace: true });
     } catch (err: any) {
@@ -89,7 +88,7 @@ export default function SignUpPage() {
         <div className={styles.content}>
           <h1 className={`t-title-24-b ${styles.title}`}>회원가입</h1>
 
-          <form onSubmit={onSubmit} className={styles.form}>
+          <form id="signupForm" onSubmit={onSubmit} className={styles.form}>
             <input
               className={`t-body-16-r ${styles.input}`}
               value={email}
@@ -179,23 +178,25 @@ export default function SignUpPage() {
                 로그인
               </Link>
             </div>
-
-            <div className={styles.bottomBar}>
-              <button
-                type="submit"
-                disabled={!canSubmit || loading}
-                className={[
-                  "t-btn-14",
-                  styles.button,
-                  canSubmit && !loading
-                    ? styles.buttonEnabled
-                    : styles.buttonDisabled,
-                ].join(" ")}
-              >
-                {loading ? "가입 중..." : "회원가입"}
-              </button>
-            </div>
           </form>
+        </div>
+      </div>
+
+      {/* ✅ 하단 고정 CTA: form 밖에 두고 form 연결 */}
+      <div className={styles.bottomBar} role="presentation">
+        <div className={styles.bottomInner}>
+          <button
+            form="signupForm"
+            type="submit"
+            disabled={!canSubmit || loading}
+            className={[
+              "t-btn-14",
+              styles.button,
+              canSubmit && !loading ? styles.buttonEnabled : styles.buttonDisabled,
+            ].join(" ")}
+          >
+            {loading ? "가입 중..." : "회원가입"}
+          </button>
         </div>
       </div>
     </div>
